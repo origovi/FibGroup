@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "474426574047",
+    "project_id": "fibgroup2021",
+    "storage_bucket": "fibgroup2021.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474426574047:android:a550e596b0a82814b2556a",
+        "android_client_info": {
+          "package_name": "com.example.fibgroup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474426574047-rl2a5aore1ukm0ge41uobm54hf7q36tu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fibgroup",
+            "certificate_hash": "d8610a49e21d6d03bc6acf55faa2bf1a6a0d476c"
+          }
+        },
+        {
+          "client_id": "474426574047-q455l47c9qn3078lsiu6d2cprf4frldp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo1KbKxgaXlXj2fuZb7Nlk-scWIDaryTA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474426574047-q455l47c9qn3078lsiu6d2cprf4frldp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
