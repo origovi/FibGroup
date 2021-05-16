@@ -13,7 +13,6 @@ We used Flutter as our main Software Development Kit and supported the project w
 ## Challenges we ran into
 - Two of the three members had never used Flutter or programed for a mobile app before, so that we had some trouble staring the project and learning about how to do it.
 - Synchronization, how to sync data between two users using different phones, simultaneously.
-- 
 
 ## Accomplishments that we're proud of
 - Make a working app. We're really proud of making a real app that solves a real problem and on top of that, it works!
