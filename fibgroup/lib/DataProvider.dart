@@ -22,7 +22,10 @@ class DataProvider extends ChangeNotifier {
     this.email = email;
   }
 
-  Future<bool> refresh() async {
+  Future<bool> refresh([User user]) async {
+    // creem un usuari nou si no existeix
+    if (user != null) await DatabaseService.comprobaICreaUsuari(user);
+
     // Update usuariData
     _usuariData = {};
     var dbUsuaris = await DatabaseService.usuaris();
@@ -114,6 +117,14 @@ class DataProvider extends ChangeNotifier {
     return null;
   }
 
+  Assignatura assigById(String assigId) {
+    return _assigData[assigId];
+  }
+
+  Usuari usuariByEmail(String email) {
+    return _usuariData[email];
+  }
+
   // MODIFICADORS
   Future<void> afegirAssig(Assignatura assig, dynamic nomGrup) async {
     bool usuariTeniaAssig = false;
@@ -131,7 +142,33 @@ class DataProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> creaGrup({@required String nom, @required String descripcio}) {
-    
+  Future<void> afegirUsuariAGrup(String grupId) async {
+    _grupData[grupId].membres.add(this.usuariActual);
+    await DatabaseService.actualitzaGrup(grupId, {'membres': _grupData[grupId].membres.map((e) => e.email).toList()});
+  }
+
+  Future<void> creaGrup(
+      {@required Assignatura assig,
+      @required String subgrup,
+      @required String nom,
+      @required String descripcio}) async {
+    Grup grup = Grup(nom: nom, descripcio: descripcio, membres: [usuariActual]);
+    String grupId = await DatabaseService.creaGrup(
+        grup: grup, assigId: assig.id, assigGrups: assig.grups, subgrup: subgrup);
+    _grupData[grupId] = grup;
+    assig.grups[subgrup].add(grupId);
+  }
+
+  Future<void> enviaInvitacio(
+      {@required Assignatura assig,
+      @required Usuari receptor,
+      @required String subgrup,
+      @required String missatge}) async {
+    await DatabaseService.enviaInvitacio(
+        assigId: assig.id,
+        receptor: receptor.email,
+        emisor: this.email,
+        subgrup: subgrup,
+        missatge: missatge);
   }
 }

@@ -9,7 +9,7 @@ class Usuari {
     nom = data['nom'] ?? "";
     email = data['email'];
     descripcio = data['descripcio'] ?? "";
-    photoUrl = data['photoUrl'] ?? "";
+    photoUrl = data['photoURL'] ?? "";
     if (data['assignatures'] != null)
       assignatures = List<Map<String, dynamic>>.from(data['assignatures']);
     else

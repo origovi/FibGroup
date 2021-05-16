@@ -7,7 +7,7 @@ class Grup {
   String descripcio;
   List<Usuari> membres;
 
-  Grup({@required this.id, @required this.nom, this.membres, this.descripcio});
+  Grup({this.id, @required this.nom, @required this.membres, @required this.descripcio});
 
   Grup.fromRaw(Map<String, dynamic> data, String id) {
     this.id = id;

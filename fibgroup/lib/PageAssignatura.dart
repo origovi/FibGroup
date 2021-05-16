@@ -1,12 +1,13 @@
 import 'package:fibgroup/DataProvider.dart';
 import 'package:fibgroup/models/Assignatura.dart';
 import 'package:fibgroup/models/Grup.dart';
+import 'package:fibgroup/models/Usuari.dart';
 import 'package:fibgroup/utils.dart';
 import 'package:fibgroup/widgets/NiceBox.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PageAssignatura extends StatelessWidget {
+class PageAssignatura extends StatefulWidget {
   final Assignatura assig;
   final String subgrup;
 
@@ -14,6 +15,11 @@ class PageAssignatura extends StatelessWidget {
       : assig = data['assig'],
         subgrup = data['grup'];
 
+  @override
+  _PageAssignaturaState createState() => _PageAssignaturaState();
+}
+
+class _PageAssignaturaState extends State<PageAssignatura> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +31,7 @@ class PageAssignatura extends StatelessWidget {
             return [
               SliverAppBar(
                   brightness: Brightness.dark,
-                  title: Text(assig.nom),
+                  title: Text(widget.assig.nom),
                   floating: true,
                   pinned: true,
                   forceElevated: innerBoxScrolled,
@@ -44,8 +50,8 @@ class PageAssignatura extends StatelessWidget {
           },
           body: TabBarView(
             children: [
-              ScreenGrups(assig, subgrup),
-              ScreenEstudiants(assig, subgrup),
+              ScreenGrups(widget.assig, widget.subgrup, setState),
+              ScreenEstudiants(widget.assig, widget.subgrup, setState),
             ],
           ),
         ),
@@ -57,7 +63,9 @@ class PageAssignatura extends StatelessWidget {
 class ScreenGrups extends StatelessWidget {
   final Assignatura assig;
   final String subgrup;
-  ScreenGrups(this.assig, this.subgrup);
+  final void Function(void Function()) parentSetState;
+
+  ScreenGrups(this.assig, this.subgrup, this.parentSetState);
 
   void nouGrup(BuildContext context) {
     GlobalKey<FormState> key = GlobalKey<FormState>();
@@ -94,11 +102,17 @@ class ScreenGrups extends StatelessWidget {
                 },
               );
               await Provider.of<DataProvider>(context, listen: false).creaGrup(
-                  nom: nomController.text.trim(), descripcio: descripcioController.text.trim());
+                  assig: assig,
+                  subgrup: subgrup,
+                  nom: nomController.text.trim(),
+                  descripcio: descripcioController.text.trim());
               Navigator.of(context).pop();
               Navigator.of(context).pop();
+              parentSetState(() {});
             } else {
-              autovalidateMode = AutovalidateMode.always;
+              setStateSt(() {
+                autovalidateMode = AutovalidateMode.always;
+              });
             }
           }
 
@@ -226,7 +240,7 @@ class ScreenGrups extends StatelessWidget {
                   children: List.generate(
                     grups.length,
                     (index) {
-                      if (grups[index].id == grupDelMembre.id) return SizedBox(height: 0);
+                      if (teGrup && grups[index].id == grupDelMembre.id) return SizedBox(height: 0);
                       return GrupTile(grup: grups[index], assig: assig);
                     },
                   ),
@@ -305,11 +319,100 @@ class GrupTile extends StatelessWidget {
 class ScreenEstudiants extends StatelessWidget {
   final Assignatura assig;
   final String subgrup;
-  ScreenEstudiants(this.assig, this.subgrup);
+  final void Function(void Function()) parentSetState;
+
+  ScreenEstudiants(this.assig, this.subgrup, this.parentSetState);
+  void enviaInvitacio(BuildContext context, Usuari receptor) {
+    GlobalKey<FormState> key = GlobalKey<FormState>();
+    TextEditingController messageController = TextEditingController();
+    AutovalidateMode autovalidateMode = AutovalidateMode.disabled;
+
+    Popup.fancyPopup(
+      columnCrossAlignment: CrossAxisAlignment.start,
+      context: context,
+      children: [
+        Text(
+          "  Invitació al grup",
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+        StatefulBuilder(builder: (contextSt, setStateSt) {
+          Future<void> validate() async {
+            if (key.currentState.validate()) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return WillPopScope(
+                    onWillPop: () {},
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              );
+              await Provider.of<DataProvider>(context, listen: false).enviaInvitacio(
+                  receptor: receptor,
+                  assig: assig,
+                  subgrup: subgrup,
+                  missatge: messageController.text.trim());
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              parentSetState(() {});
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                duration: Duration(seconds: 3),
+                content: Text("Invitació enviada"),
+              ));
+            } else {
+              setStateSt(() {
+                autovalidateMode = AutovalidateMode.always;
+              });
+            }
+          }
+
+          return Form(
+            key: key,
+            autovalidateMode: autovalidateMode,
+            child: Column(
+              children: [
+                TextFormField(
+                  autofocus: true,
+                  controller: messageController,
+                  keyboardType: TextInputType.name,
+                  textCapitalization: TextCapitalization.sentences,
+                  validator: (value) {
+                    if (value.trim().isNotEmpty) {
+                      return null;
+                    } else
+                      return "Introdueix un missatge vàlid";
+                  },
+                  decoration: InputDecoration(
+                    //hintText: "This will be fixed for the person's lifetime",
+                    //hintStyle: TextStyle(fontSize: 12),
+                    labelText: "Missatge *",
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                    isDense: true,
+                    filled: true,
+                  ),
+                ),
+                ElevatedButton(onPressed: validate, child: Text("Envia"))
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var membres = Provider.of<DataProvider>(context, listen: false).membresAssig(this.assig);
-    print("LENNN" + membres.length.toString());
     return Scaffold(
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -340,46 +443,77 @@ class ScreenEstudiants extends StatelessWidget {
                         width: double.infinity,
                         padding: EdgeInsets.only(bottom: 15),
                         child: NiceBox(
+                          onTap: () {
+                            if (!teGrup) {
+                              final provider = Provider.of<DataProvider>(context, listen: false);
+                              Grup grupMembre =
+                                  provider.grupDelMembre(assig, subgrup, provider.usuariActual);
+                              if (grupMembre != null) {
+                                if (grupMembre.membres.length < assig.maxNumIntegrants)
+                                  enviaInvitacio(context, membres[index]);
+                                else {
+                                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    duration: Duration(seconds: 3),
+                                    content: Text("El teu grup està ple"),
+                                  ));
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  duration: Duration(seconds: 3),
+                                  content: Text("Has d'estar en un grup abans de convidar"),
+                                ));
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                duration: Duration(seconds: 3),
+                                content: Text("L'estudiant ja està en un grup"),
+                              ));
+                            }
+                          },
                           color: (!teGrup) ? Colors.white : Colors.grey[500],
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(membres[index].nom,
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       )),
-                                  if (membres[index].descripcio != null &&
-                                      membres[index].descripcio.isNotEmpty)
+                                  Row(
+                                    children: [
+                                      Text("Disponible"),
+                                      Checkbox(
+                                        visualDensity: VisualDensity.compact,
+                                        value: !teGrup,
+                                        onChanged: (_) {},
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              if (membres[index].descripcio != null &&
+                                  membres[index].descripcio.isNotEmpty)
+                                Text(
+                                  membres[index].descripcio,
+                                  style: TextStyle(
+                                      color: Colors.grey[700], fontStyle: FontStyle.italic),
+                                ),
+                              if (teGrup)
+                                Row(
+                                  children: [
                                     Text(
-                                      membres[index].descripcio,
-                                      style: TextStyle(
-                                          color: Colors.grey[700], fontStyle: FontStyle.italic),
+                                      "Grup: ",
+                                      style: TextStyle(color: Colors.grey[700]),
                                     ),
-                                  if (teGrup)
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Grup: ",
-                                          style: TextStyle(color: Colors.grey[700]),
-                                        ),
-                                        Text(grupDelMembre.nom),
-                                      ],
-                                    ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text("Disponible"),
-                                  Checkbox(
-                                    value: !teGrup,
-                                    onChanged: (_) {},
-                                  )
-                                ],
-                              ),
+                                    Text(grupDelMembre.nom),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

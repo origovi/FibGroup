@@ -22,7 +22,7 @@ class SignInProvider extends ChangeNotifier {
     isSigningIn = true; // the setter is called
     final user = await googleSignIn.signIn();
     if (user != null) {
-      if (user.email.endsWith('@estudiantat.upc.edu')) {
+      if (!user.email.endsWith('@estudiantat.upc.edu')) {
         await googleSignIn.signOut();
         isSigningIn = false;
         return false;
