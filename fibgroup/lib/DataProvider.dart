@@ -125,6 +125,13 @@ class DataProvider extends ChangeNotifier {
     return _usuariData[email];
   }
 
+  String subgrupMeu(String assigId) {
+    for (var map in _mevesAssigs) {
+      if (map['id'] == assigId) return map['grup'];
+    }
+    return "";
+  }
+
   // MODIFICADORS
   Future<void> afegirAssig(Assignatura assig, dynamic nomGrup) async {
     bool usuariTeniaAssig = false;
@@ -144,7 +151,8 @@ class DataProvider extends ChangeNotifier {
 
   Future<void> afegirUsuariAGrup(String grupId) async {
     _grupData[grupId].membres.add(this.usuariActual);
-    await DatabaseService.actualitzaGrup(grupId, {'membres': _grupData[grupId].membres.map((e) => e.email).toList()});
+    await DatabaseService.actualitzaGrup(
+        grupId, {'membres': _grupData[grupId].membres.map((e) => e.email).toList()});
   }
 
   Future<void> creaGrup(

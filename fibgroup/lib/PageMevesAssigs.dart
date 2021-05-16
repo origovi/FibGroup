@@ -48,16 +48,11 @@ class _PageMevesAssigsState extends State<PageMevesAssigs> {
                     ),
                     if (mevesAssigs[index]['assig'].grups != null &&
                         mevesAssigs[index]['assig'].grups.isNotEmpty)
-                      Column(
-                        children: List.generate(
-                          mevesAssigs[index]['assig'].grups.length,
-                          (index2) {
-                            return Text(
-                              "  " + mevesAssigs[index]['assig'].grups.keys.elementAt(index2),
-                              style: TextStyle(fontSize: 12),
-                            );
-                          },
-                        ),
+                      Text(
+                        "  " +
+                            Provider.of<DataProvider>(context, listen: false)
+                                .subgrupMeu(mevesAssigs[index]['assig'].id),
+                        style: TextStyle(fontSize: 12),
                       ),
                   ],
                 ),

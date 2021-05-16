@@ -11,7 +11,7 @@ class PageLogin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Please log in"),
+        title: Text("Identifica't si us plau"),
       ),
       body: Center(child: loading ? CircularProgressIndicator() : _LoginButton(context)),
     );
